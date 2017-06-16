@@ -340,7 +340,15 @@ export const Task = EmberObject.extend(TaskStateMixin, {
    * @instance
    */
   perform(...args) {
-    return this._performShared(args, PERFORM_TYPE_DEFAULT, null);
+    let taskInstances = this._performShared(args, PERFORM_TYPE_DEFAULT, null);
+    this._scheduler.schedule(taskInstances)
+    return taskInstances;
+  },
+
+  performBulk(instances) {
+    let taskInstances = instances.map((instanceArgs) => this._performShared(instanceArgs));
+    this._scheduler.scheduleBulk(taskInstances)
+    return taskInstances;
   },
 
   _performShared(args, performType, linkedObject) {
@@ -366,7 +374,6 @@ export const Task = EmberObject.extend(TaskStateMixin, {
       taskInstance.cancel();
     }
 
-    this._scheduler.schedule(taskInstance);
     return taskInstance;
   },
 
@@ -374,6 +381,7 @@ export const Task = EmberObject.extend(TaskStateMixin, {
     return this.perform(...args);
   },
 });
+
 
 /**
   A {@link TaskProperty} is the Computed Property-like object returned
