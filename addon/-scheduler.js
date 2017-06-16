@@ -58,6 +58,17 @@ const Scheduler = Ember.Object.extend({
     this._flushQueues();
   },
 
+  scheduleBulk(taskInstances) {
+    taskInstances.forEach((taskInstance) => {
+      taskInstance.task.incrementProperty('numQueued');
+    });
+
+    set(this, 'lastPerformed', get(taskInstances, 'lastObject'));
+    this.incrementProperty('performCount', taskInstances.length);
+    this.queuedTaskInstances.push(...taskInstances);
+    this._flushQueues();
+  },
+
   _flushQueues() {
     let seen = [];
 

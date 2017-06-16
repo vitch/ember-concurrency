@@ -305,6 +305,18 @@ export const Task = Ember.Object.extend(TaskStateMixin, {
    * @instance
    */
   perform(...args) {
+    let taskInstance = this._perform(args);
+    this._scheduler.schedule(taskInstance);
+    return taskInstance;
+  },
+
+  performBulk(instances) {
+    let taskInstances = instances.map((instanceArgs) => this._perform(instanceArgs));
+    this._scheduler.scheduleBulk(taskInstances)
+    return taskInstances;
+  },
+
+  _perform(args) {
     let fullArgs = this._curryArgs ? [...this._curryArgs, ...args] : args;
     let taskInstance = this._taskInstanceFactory.create({
       fn: this.fn,
@@ -320,7 +332,6 @@ export const Task = Ember.Object.extend(TaskStateMixin, {
       taskInstance.cancel();
     }
 
-    this._scheduler.schedule(taskInstance);
     return taskInstance;
   },
 
@@ -328,6 +339,7 @@ export const Task = Ember.Object.extend(TaskStateMixin, {
     return this.perform(...args);
   },
 });
+
 
 /**
   A {@link TaskProperty} is the Computed Property-like object returned
